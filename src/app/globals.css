@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Noto Sans JP for Japanese text rendering */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* Cornell Lab brand tokens */
+  --color-warm-black: #2E261F;
+  --color-sand: #F5F3E9;
+  --color-sand-tint1: #FBFAF6;
+  --color-sand-shade: #DAD5BC;
+  --color-sky-blue: #D0DDDB;
+  --color-forest-green: #296239;
+  --color-forest-green-shade: #284530;
+  --color-ocean-blue-shade: #385B75;
+  --color-gold: #FFBC10;
+  --color-gold-tint2: #FFF3A5;
+  --color-red: #DF1E12;
+
+  --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: Georgia, serif;
+  --font-jp: 'Noto Sans JP', 'Noto Sans', sans-serif;
+}
+
+html {
+  font-family: var(--font-sans);
+  color: var(--color-warm-black);
+  background-color: #ffffff;
+}
+
+body {
+  min-height: 100vh;
+}
+
+/* The Line — Cornell Lab divider element */
+.the-line {
+  border: none;
+  border-top: 1px solid var(--color-warm-black);
+  margin: 0;
+}
+
+.the-line--white {
+  border-top-color: #ffffff;
+}
+
+.the-line--red {
+  border-top-color: var(--color-red);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-sand);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand-shade);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-warm-black);
+}
+
+/* Japanese character rendering */
+.jp-text {
+  font-family: var(--font-jp);
+}
