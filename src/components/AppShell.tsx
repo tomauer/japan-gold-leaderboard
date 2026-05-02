@@ -1,65 +1,47 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Menu, AlertTriangle } from "lucide-react";
+import { useState } from "react";
+import { Menu } from "lucide-react";
 import { Sidebar } from "./Sidebar";
-import { StatusBar } from "./StatusBar";
 import { NationalLeaderboard } from "./NationalLeaderboard";
 import { PrefectureLeaderboard } from "./PrefectureLeaderboard";
 import { PrefectureActivityLeaderboard } from "./PrefectureActivityLeaderboard";
 import type { LeaderboardApiResponse, ViewMode } from "@/types";
 
-export function AppShell() {
+interface AppShellProps {
+  initialData: LeaderboardApiResponse;
+}
+
+export function AppShell({ initialData }: AppShellProps) {
   const [view, setView] = useState<ViewMode>("national");
   const [selectedPrefecture, setSelectedPrefecture] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [data, setData] = useState<LeaderboardApiResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchData = useCallback(async (forceRefresh = false) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const url = forceRefresh ? "/api/leaderboard?refresh=1" : "/api/leaderboard";
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`);
-      }
-      const json = await res.json() as LeaderboardApiResponse;
-      setData(json);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
 
   function handleSelectView(newView: ViewMode, prefCode?: string) {
     setView(newView);
     if (prefCode) setSelectedPrefecture(prefCode);
   }
 
-  const mainContent = () => {
-    if (isLoading && !data) return <LoadingState />;
-    if (error && !data) return <ErrorState message={error} onRetry={fetchData} />;
-    if (!data) return null;
+  const formattedDate = initialData.lastUpdated
+    ? new Intl.DateTimeFormat("ja-JP", {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "Asia/Tokyo",
+      }).format(new Date(initialData.lastUpdated))
+    : null;
 
-    if (view === "national") return <NationalLeaderboard data={data} />;
+  const mainContent = () => {
+    if (view === "national") return <NationalLeaderboard data={initialData} />;
     if (view === "prefecture" && selectedPrefecture)
-      return <PrefectureLeaderboard data={data} prefectureCode={selectedPrefecture} />;
+      return <PrefectureLeaderboard data={initialData} prefectureCode={selectedPrefecture} />;
     if (view === "activity")
       return (
         <PrefectureActivityLeaderboard
-          data={data}
+          data={initialData}
           onSelectPrefecture={(code) => handleSelectView("prefecture", code)}
         />
       );
-    return <NationalLeaderboard data={data} />;
+    return <NationalLeaderboard data={initialData} />;
   };
 
   return (
@@ -76,7 +58,7 @@ export function AppShell() {
       {/* Main column, offset for sidebar */}
       <div className="flex-1 flex flex-col min-h-screen lg:ml-56">
 
-        {/* eBird-style top nav: white + 4px red top border */}
+        {/* eBird-style top nav */}
         <header
           className="flex items-center justify-between px-6 py-3"
           style={{
@@ -86,16 +68,14 @@ export function AppShell() {
           }}
         >
           <div className="flex items-center gap-3">
-            {/* Mobile menu */}
             <button
               className="lg:hidden p-1 rounded"
               onClick={() => setSidebarOpen(true)}
-              aria-label="Open navigation"
+              aria-label="ナビゲーションを開く"
               style={{ color: "#6f6e67" }}
             >
               <Menu size={20} />
             </button>
-            {/* eBird wordmark */}
             <span
               className="font-bold text-xl tracking-tight select-none"
               style={{ color: "#007c73" }}
@@ -120,7 +100,7 @@ export function AppShell() {
           </div>
         </header>
 
-        {/* Region banner — #385b75 like eBird's PageHeading */}
+        {/* Region banner */}
         <div style={{ backgroundColor: "#385b75" }}>
           <div className="px-8 py-5 flex items-end justify-between">
             <div>
@@ -134,15 +114,14 @@ export function AppShell() {
                 ゴールドリーダーボード
               </h1>
               <p className="mt-2 text-sm" style={{ color: "#b4cfe1" }}>
-                過去{data?.windowDays ?? 7}日間の高品質チェックリスト · 全47都道府県
+                過去{initialData.windowDays}日間の高品質チェックリスト · 全47都道府県
               </p>
             </div>
-            <StatusBar
-              lastUpdated={data?.lastUpdated ?? null}
-              isLoading={isLoading}
-              cacheHit={data?.cacheHit ?? false}
-              onRefresh={() => fetchData(true)}
-            />
+            {formattedDate && (
+              <span className="text-xs hidden md:block flex-shrink-0" style={{ color: "#b4cfe1" }}>
+                更新: {formattedDate} JST
+              </span>
+            )}
           </div>
         </div>
 
@@ -168,53 +147,9 @@ export function AppShell() {
           >
             eBird
           </a>{" "}
-          · コーネル大学鳥類学研究室 · 過去{data?.windowDays ?? 7}日間 · JP-01〜JP-47
+          · コーネル大学鳥類学研究室 · 過去{initialData.windowDays}日間 · JP-01〜JP-47
         </footer>
       </div>
-    </div>
-  );
-}
-
-function LoadingState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 gap-4">
-      <div
-        className="h-10 w-10 rounded-full border-4 animate-spin"
-        style={{ borderColor: "#e5e3dc", borderTopColor: "#385b75" }}
-      />
-      <div className="text-center">
-        <p className="font-medium" style={{ color: "#2e261f" }}>eBirdデータを取得中…</p>
-        <p className="text-sm mt-1" style={{ color: "#6f6e67" }}>
-          全47都道府県をスキャン中 — 初回読み込みに少々時間がかかる場合があります
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return (
-    <div
-      className="rounded-lg border p-6 flex flex-col items-center gap-3 text-center mt-4"
-      style={{ borderColor: "#b31b1b", backgroundColor: "#fff8f7" }}
-    >
-      <AlertTriangle size={28} style={{ color: "#b31b1b" }} />
-      <div>
-        <p className="font-semibold" style={{ color: "#2e261f" }}>リーダーボードデータを読み込めませんでした</p>
-        <p className="text-sm mt-1" style={{ color: "#6f6e67" }}>{message}</p>
-        {message.includes("EBIRD_API_KEY") && (
-          <p className="text-sm mt-2" style={{ color: "#6f6e67" }}>
-            <code className="bg-[#f4f3f1] px-1 rounded">.env.local</code> にAPIキーを追加してサーバーを再起動してください。
-          </p>
-        )}
-      </div>
-      <button
-        onClick={onRetry}
-        className="mt-1 rounded px-4 py-2 text-sm font-medium text-white"
-        style={{ backgroundColor: "#385b75" }}
-      >
-        再試行
-      </button>
     </div>
   );
 }
