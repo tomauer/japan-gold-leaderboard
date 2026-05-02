@@ -17,8 +17,6 @@ async function ebirdFetch<T>(path: string): Promise<T> {
   const url = `${EBIRD_BASE}${path}`;
   const res = await fetch(url, {
     headers: { "X-eBirdApiToken": getApiKey() },
-    // Let Next.js data cache handle deduplication within a request cycle
-    next: { revalidate: 0 },
   });
 
   if (!res.ok) {
