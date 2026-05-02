@@ -43,6 +43,13 @@ jobs:
           EBIRD_API_KEY: ${{ secrets.EBIRD_API_KEY }}
           NEXT_PUBLIC_BASE_PATH: /japan-gold-leaderboard
 
+      - name: Debug build output
+        run: |
+          echo "=== out/ contents ==="
+          ls -la out/ || echo "ERROR: out/ does not exist"
+          echo "=== index.html exists? ==="
+          test -f out/index.html && echo "YES" || echo "NO"
+
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
