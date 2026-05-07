@@ -2,8 +2,12 @@ import type { EBirdChecklistSummary, EBirdChecklistDetail } from "@/types";
 import { checklistDetailCache, checklistListCache } from "./checklist-cache";
 
 const EBIRD_BASE = "https://api.ebird.org/v2";
-const WINDOW_DAYS = 7;
 const MAX_RESULTS = 200;
+// Gold Checklist Challenge: midnight JST May 9 → 11:59 PM JST May 17, 2026
+const CHALLENGE_START = new Date("2026-05-09T00:00:00+09:00");
+const CHALLENGE_END   = new Date("2026-05-17T23:59:59+09:00");
+// Days back to pass to the eBird list endpoint — covers the full 9-day challenge from any build date
+const BACK_DAYS = 10;
 // Concurrent fetch limit to respect eBird rate limits
 const CONCURRENCY = 5;
 
@@ -57,7 +61,7 @@ export async function fetchPrefectureChecklistSummaries(
 
   try {
     const summaries = await ebirdFetch<EBirdChecklistSummary[]>(
-      `/product/lists/${regionCode}?maxResults=${MAX_RESULTS}`
+      `/product/lists/${regionCode}?maxResults=${MAX_RESULTS}&back=${BACK_DAYS}`
     );
     checklistListCache.set(cacheKey, summaries);
     return summaries;
@@ -85,19 +89,17 @@ export async function fetchChecklistDetail(
   }
 }
 
-function isWithinWindow(dateStr: string): boolean {
-  // dateStr is "2026-05-02 17:55" format (isoObsDate from list, obsDt from detail)
-  const obsDate = new Date(dateStr.replace(" ", "T"));
+function isWithinChallengeWindow(dateStr: string): boolean {
+  // dateStr is "2026-05-09 08:30" format (JST local time from eBird Japan) — append +09:00
+  const obsDate = new Date(dateStr.replace(" ", "T") + "+09:00");
   if (isNaN(obsDate.getTime())) return true; // can't parse → let through, filter in detail
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - WINDOW_DAYS);
-  return obsDate >= cutoff;
+  return obsDate >= CHALLENGE_START && obsDate <= CHALLENGE_END;
 }
 
 // Light pre-filter on summaries: only date check (quality fields aren't in the list response)
 export function preFilterSummary(s: EBirdChecklistSummary): boolean {
   const dateStr = s.isoObsDate ?? s.obsDt;
-  if (dateStr && !isWithinWindow(dateStr)) return false;
+  if (dateStr && !isWithinChallengeWindow(dateStr)) return false;
   return true;
 }
 

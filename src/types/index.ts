@@ -106,7 +106,7 @@ export interface LeaderboardApiResponse {
   byPrefecture: Record<string, ObserverScore[]>;
   prefectureActivity: PrefectureScore[];
   lastUpdated: string;
-  windowDays: number;
+  challengePeriod: string;
   totalChecklistsProcessed: number;
   totalGoldChecklists: number;
   totalSilverChecklists: number;

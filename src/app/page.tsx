@@ -24,7 +24,7 @@ async function fetchLeaderboardData(): Promise<LeaderboardApiResponse> {
     byPrefecture,
     prefectureActivity,
     lastUpdated: new Date().toISOString(),
-    windowDays: 7,
+    challengePeriod: "5/9〜5/17",
     totalChecklistsProcessed: allDetails.length,
     totalGoldChecklists: scored.filter((s) => s.tier === "gold").length,
     totalSilverChecklists: scored.filter((s) => s.tier === "silver").length,

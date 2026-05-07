@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
   schedule:
-    # Rebuild every hour at :07
-    - cron: "7 * * * *"
+    # Rebuild every 4 hours at :07
+    - cron: "7 */4 * * *"
   workflow_dispatch:
 
 permissions:

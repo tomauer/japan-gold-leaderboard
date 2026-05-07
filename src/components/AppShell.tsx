@@ -114,7 +114,7 @@ export function AppShell({ initialData }: AppShellProps) {
                 ゴールドリーダーボード
               </h1>
               <p className="mt-2 text-sm" style={{ color: "#b4cfe1" }}>
-                過去{initialData.windowDays}日間の高品質チェックリスト · 全47都道府県
+                {initialData.challengePeriod}の高品質チェックリスト · 全47都道府県
               </p>
             </div>
             {formattedDate && (
@@ -147,7 +147,7 @@ export function AppShell({ initialData }: AppShellProps) {
           >
             eBird
           </a>{" "}
-          · コーネル大学鳥類学研究室 · 過去{initialData.windowDays}日間 · JP-01〜JP-47
+          · コーネル大学鳥類学研究室 · {initialData.challengePeriod} · JP-01〜JP-47
         </footer>
       </div>
     </div>

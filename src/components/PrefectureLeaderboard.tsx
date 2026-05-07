@@ -98,7 +98,7 @@ export function PrefectureLeaderboard({
       <LeaderboardTable
         data={observers}
         title={`${pref.nameJa}ランキング`}
-        subtitle={`${pref.nameJa}の上位${Math.min(observers.length, 25)}人 · 過去${data.windowDays}日間`}
+        subtitle={`${pref.nameJa}の上位${Math.min(observers.length, 25)}人 · ${data.challengePeriod}`}
         maxRows={25}
       />
 

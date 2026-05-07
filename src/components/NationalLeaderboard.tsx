@@ -29,7 +29,7 @@ export function NationalLeaderboard({ data }: NationalLeaderboardProps) {
           全国リーダーボード
         </h2>
         <p className="mt-1 text-sm" style={{ color: "#6f6e67" }}>
-          全47都道府県のトップ観察者 — 過去{data.windowDays}日間
+          全47都道府県のトップ観察者 — {data.challengePeriod}
         </p>
         <hr style={{ borderColor: "#e5e3dc", marginTop: "0.75rem" }} />
       </div>
